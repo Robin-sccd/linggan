@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>灵感捕手</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #0e0c0a;
+  --surface: #181512;
+  --surface2: #211d19;
+  --border: #2e2820;
+  --border2: #3d352b;
+  --text: #e8dfd0;
+  --text2: #9a8e7e;
+  --text3: #5a5048;
+  --amber: #d4883a;
+  --amber-dim: #8a5520;
+  --amber-glow: rgba(212,136,58,0.15);
+  --red: #c44a3a;
+  --green: #4a8a5a;
+  --card-hover: #1d1915;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 430px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  position: relative;
+}
+
+/* Subtle grain */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* ─── HEADER ─── */
+.header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.logo {
+  font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+  font-size: 20px;
+  letter-spacing: 0.1em;
+  color: var(--text);
+}
+
+.logo em {
+  font-style: normal;
+  color: var(--amber);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.count-badge {
+  font-size: 11px;
+  color: var(--text3);
+  background: var(--surface2);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  letter-spacing: 0.04em;
+}
+
+/* Search */
+.search-row {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px 9px 36px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Noto Sans SC', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus { border-color: var(--amber-dim); }
+.search-input::placeholder { color: var(--text3); }
+
+/* ─── INPUT PANEL ─── */
+.input-panel {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+/* Mode tabs */
+.mode-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 7px 0;
+  text-align: center;
+  font-size: 13px;
+  font-family: 'Noto Sans SC', sans-serif;
+  color: var(--text3);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.mode-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* Voice recorder */
+.voice-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.record-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  color: var(--text2);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.25s;
+  position: relative;
+}
+
+.record-btn.recording {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
+  animation: record-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes record-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196,74,58,0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(196,74,58,0); }
+}
+
+.voice-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.voice-status {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.voice-status b { color: var(--amber); font-weight: 500; }
+
+/* Wave */
+.wave {
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 18px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.wave.on { opacity: 1; }
+.wave-bar {
+  width: 2.5px;
+  background: var(--amber);
+  border-radius: 2px;
+  animation: wb 0.9s ease-in-out infinite;
+}
+.wave-bar:nth-child(1){height:4px;animation-delay:0s}
+.wave-bar:nth-child(2){height:10px;animation-delay:0.08s}
+.wave-bar:nth-child(3){height:16px;animation-delay:0.16s}
+.wave-bar:nth-child(4){height:12px;animation-delay:0.24s}
+.wave-bar:nth-child(5){height:6px;animation-delay:0.32s}
+.wave-bar:nth-child(6){height:14px;animation-delay:0.16s}
+.wave-bar:nth-child(7){height:8px;animation-delay:0.08s}
+
+@keyframes wb {
+  0%,100%{transform:scaleY(0.5)}
+  50%{transform:scaleY(1.3)}
+}
+
+/* Transcription preview */
+.transcript-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  min-height: 54px;
+  margin-top: 10px;
+  display: none;
+  word-break: break-all;
+  max-height: 90px;
+  overflow-y: auto;
+}
+
+.transcript-box.visible { display: block; }
+.transcript-interim { color: var(--text2); }
+
+/* Text input section */
+.text-section { display: none; }
+.text-section.on { display: block; }
+
+.idea-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: 'Noto Sans SC', sans-serif;
+  resize: none;
+  outline: none;
+  line-height: 1.7;
+  min-height: 80px;
+  transition: border-color 0.2s;
+}
+.idea-textarea:focus { border-color: var(--amber-dim); }
+.idea-textarea::placeholder { color: var(--text3); }
+
+/* Tags + save row */
+.bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.tag-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.tag-pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  font-family: 'Noto Sans SC', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.tag-pill.sel {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.save-btn {
+  background: var(--amber);
+  color: var(--bg);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Noto Sans SC', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.save-btn:active { opacity: 0.8; transform: scale(0.97); }
+
+/* ─── FILTER BAR ─── */
+.filter-bar {
+  padding: 10px 20px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  font-family: 'Noto Sans SC', sans-serif;
+  transition: all 0.15s;
+}
+
+.filter-chip.active {
+  background: var(--surface2);
+  border-color: var(--amber-dim);
+  color: var(--text);
+}
+
+/* ─── CARDS LIST ─── */
+.list-wrap {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 20px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.list-wrap::-webkit-scrollbar { width: 3px; }
+.list-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3);
+  font-size: 14px;
+  line-height: 2;
+}
+
+.empty-icon { font-size: 36px; display: block; margin-bottom: 12px; opacity: 0.5; }
+
+/* Card */
+.idea-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  animation: card-in 0.25s ease both;
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-main {
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.card-tag-badge {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+.badge-思考 { background: rgba(212,136,58,0.15); color: #d4883a; }
+.badge-创意 { background: rgba(74,138,210,0.15); color: #5a9ada; }
+.badge-观察 { background: rgba(74,138,90,0.15); color: #4a8a5a; }
+.badge-问题 { background: rgba(180,74,180,0.15); color: #c07ac0; }
+.badge-其他 { background: var(--surface2); color: var(--text3); }
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-source-icon { font-size: 12px; opacity: 0.5; }
+.card-time { font-size: 11px; color: var(--text3); }
+
+.card-body {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.idea-card.expanded .card-body {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* Card actions */
+.card-actions {
+  display: none;
+  padding: 0 16px 14px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.idea-card.expanded .card-actions { display: flex; }
+
+.action-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: 'Noto Sans SC', sans-serif;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text2);
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn:hover { border-color: var(--amber-dim); color: var(--amber); }
+.action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+/* AI result panel */
+.ai-panel {
+  display: none;
+  margin: 0 16px 14px;
+  padding: 14px;
+  background: var(--surface2);
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+}
+
+.ai-panel.visible { display: block; }
+
+.ai-panel-header {
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-text {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.ai-text.loading {
+  font-family: 'Noto Sans SC', sans-serif;
+  color: var(--text3);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-copy-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* Spinner */
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  z-index: 1000;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<div class="header">
+  <div class="header-row">
+    <div class="logo">灵感<em>捕手</em></div>
+    <div class="header-right">
+      <div class="count-badge" id="count-badge">0 条</div>
+    </div>
+  </div>
+  <div class="search-row">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" type="text" id="search-input" placeholder="搜索想法内容、标签…" />
+  </div>
+</div>
+
+<!-- ─── INPUT PANEL ─── -->
+<div class="input-panel">
+  <div class="mode-row">
+    <button class="mode-tab active" id="tab-voice" onclick="switchMode('voice')">🎙 语音录入</button>
+    <button class="mode-tab" id="tab-text" onclick="switchMode('text')">✍️ 文字输入</button>
+  </div>
+
+  <!-- VOICE -->
+  <div id="voice-section">
+    <div class="voice-section">
+      <button class="record-btn" id="record-btn" onclick="toggleRecord()">🎙</button>
+      <div class="voice-right">
+        <div class="voice-status" id="voice-status">点击按钮开始说话</div>
+        <div class="wave" id="wave">
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+      </div>
+    </div>
+    <div class="transcript-box" id="transcript-box"></div>
+    <div class="bottom-row" id="voice-bottom" style="display:none;">
+      <div class="tag-row" id="voice-tags">
+        <button class="tag-pill" onclick="pickTag(this,'voice')">思考</button>
+        <button class="tag-pill" onclick="pickTag(this,'voice')">创意</button>
+        <button class="tag-pill" onclick="pickTag(this,'voice')">观察</button>
+        <button class="tag-pill" onclick="pickTag(this,'voice')">问题</button>
+      </div>
+      <button class="save-btn" onclick="saveIdea('voice')">保存</button>
+    </div>
+  </div>
+
+  <!-- TEXT -->
+  <div class="text-section" id="text-section">
+    <textarea class="idea-textarea" id="text-area" placeholder="写下此刻的想法…&#10;一个念头、一句话、一个问题，都值得被记录。" rows="4"
+      oninput="onTextInput()"></textarea>
+    <div class="bottom-row">
+      <div class="tag-row" id="text-tags">
+        <button class="tag-pill" onclick="pickTag(this,'text')">思考</button>
+        <button class="tag-pill" onclick="pickTag(this,'text')">创意</button>
+        <button class="tag-pill" onclick="pickTag(this,'text')">观察</button>
+        <button class="tag-pill" onclick="pickTag(this,'text')">问题</button>
+      </div>
+      <button class="save-btn" id="text-save-btn" onclick="saveIdea('text')" disabled style="opacity:.4">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FILTER BAR ─── -->
+<div class="filter-bar">
+  <button class="filter-chip active" onclick="setFilter(this,'')">全部</button>
+  <button class="filter-chip" onclick="setFilter(this,'思考')">思考</button>
+  <button class="filter-chip" onclick="setFilter(this,'创意')">创意</button>
+  <button class="filter-chip" onclick="setFilter(this,'观察')">观察</button>
+  <button class="filter-chip" onclick="setFilter(this,'问题')">问题</button>
+  <button class="filter-chip" onclick="setFilter(this,'其他')">其他</button>
+</div>
+
+<!-- ─── LIST ─── -->
+<div class="list-wrap" id="list-wrap"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──
+let ideas = JSON.parse(localStorage.getItem('lgsIdeas') || '[]');
+let mode = 'voice';
+let selTag = { voice: '其他', text: '其他' };
+let filterTag = '';
+let searchQ = '';
+let isRecording = false;
+let recognition = null;
+let transcriptFinal = '';
+let transcriptInterim = '';
+
+// ── Boot ──
+render();
+updateCount();
+initASR();
+
+// Sample data on first load
+if (!ideas.length) {
+  ideas = [
+    { id: 1001, content: '人们总是高估一年能做到的事，却低估十年能做到的事。我们对短期太焦虑，对长期太懈怠。也许真正的复利不在于投资，而在于每天微小但持续的思考和行动。', tag: '思考', src: 'voice', time: '3月4日 09:12', ai: null },
+    { id: 1002, content: '做一个工具，专门帮开车的人用语音记录灵感，然后AI自动整理成公众号草稿。核心是「摩擦力极低的记录」——按下就说，说完就保存，后续再整理。', tag: '创意', src: 'voice', time: '3月4日 08:45', ai: null },
+    { id: 1003, content: '今天注意到一个现象：越是聪明的人，越倾向于把问题复杂化。而真正有智慧的人，会把复杂的事情用简单的语言说清楚。', tag: '观察', src: 'text', time: '3月3日 21:30', ai: null },
+  ];
+  save();
+  render();
+  updateCount();
+}
+
+// ── Mode switch ──
+function switchMode(m) {
+  mode = m;
+  document.getElementById('tab-voice').classList.toggle('active', m === 'voice');
+  document.getElementById('tab-text').classList.toggle('active', m === 'text');
+  document.getElementById('voice-section').style.display = m === 'voice' ? '' : 'none';
+  const ts = document.getElementById('text-section');
+  ts.classList.toggle('on', m === 'text');
+}
+
+// ── ASR ──
+function initASR() {
+  const ASR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!ASR) return;
+  recognition = new ASR();
+  recognition.lang = 'zh-CN';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onresult = e => {
+    let fin = '', inter = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) fin += e.results[i][0].transcript;
+      else inter += e.results[i][0].transcript;
+    }
+    transcriptFinal += fin;
+    transcriptInterim = inter;
+    updateTranscript();
+  };
+  recognition.onerror = e => {
+    if (e.error !== 'no-speech') { stopRec(); showToast('识别出错，请重试'); }
+  };
+  recognition.onend = () => { if (isRecording) { try { recognition.start(); } catch(e){} } };
+}
+
+function toggleRecord() {
+  isRecording ? stopRec() : startRec();
+}
+
+function startRec() {
+  if (!recognition) { showToast('当前浏览器不支持语音识别（请用 Chrome）'); return; }
+  isRecording = true;
+  transcriptFinal = '';
+  transcriptInterim = '';
+  document.getElementById('record-btn').classList.add('recording');
+  document.getElementById('record-btn').textContent = '⏹';
+  document.getElementById('voice-status').innerHTML = '<b>正在录音</b>，再次点击停止';
+  document.getElementById('wave').classList.add('on');
+  document.getElementById('transcript-box').className = 'transcript-box visible';
+  document.getElementById('transcript-box').innerHTML = '<span style="color:var(--text3);font-size:13px">聆听中…</span>';
+  try { recognition.start(); } catch(e) {}
+}
+
+function stopRec() {
+  isRecording = false;
+  try { recognition.stop(); } catch(e) {}
+  document.getElementById('record-btn').classList.remove('recording');
+  document.getElementById('record-btn').textContent = '🎙';
+  document.getElementById('voice-status').textContent = '点击按钮开始说话';
+  document.getElementById('wave').classList.remove('on');
+  if (transcriptFinal.trim()) {
+    document.getElementById('voice-bottom').style.display = 'flex';
+  }
+}
+
+function updateTranscript() {
+  const box = document.getElementById('transcript-box');
+  box.innerHTML = escHtml(transcriptFinal) + (transcriptInterim ? `<span class="transcript-interim">${escHtml(transcriptInterim)}</span>` : '');
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── Tags ──
+function pickTag(el, m) {
+  const cont = document.getElementById(m + '-tags');
+  cont.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('sel'));
+  el.classList.add('sel');
+  selTag[m] = el.textContent;
+}
+
+// ── Text input ──
+function onTextInput() {
+  const v = document.getElementById('text-area').value.trim();
+  const btn = document.getElementById('text-save-btn');
+  btn.disabled = !v;
+  btn.style.opacity = v ? '1' : '0.4';
+}
+
+// ── Save ──
+function saveIdea(m) {
+  const content = m === 'voice'
+    ? (transcriptFinal + transcriptInterim).trim()
+    : document.getElementById('text-area').value.trim();
+
+  if (!content) { showToast('内容不能为空'); return; }
+
+  const now = new Date();
+  const idea = {
+    id: Date.now(),
+    content,
+    tag: selTag[m],
+    src: m,
+    time: `${now.getMonth()+1}月${now.getDate()}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+    ai: null
+  };
+
+  ideas.unshift(idea);
+  save();
+
+  // Reset
+  if (m === 'voice') {
+    transcriptFinal = ''; transcriptInterim = '';
+    document.getElementById('transcript-box').className = 'transcript-box';
+    document.getElementById('voice-bottom').style.display = 'none';
+    document.getElementById('voice-tags').querySelectorAll('.tag-pill').forEach(p => p.classList.remove('sel'));
+    selTag.voice = '其他';
+  } else {
+    document.getElementById('text-area').value = '';
+    document.getElementById('text-save-btn').disabled = true;
+    document.getElementById('text-save-btn').style.opacity = '0.4';
+    document.getElementById('text-tags').querySelectorAll('.tag-pill').forEach(p => p.classList.remove('sel'));
+    selTag.text = '其他';
+  }
+
+  render();
+  updateCount();
+  showToast('✓ 已保存');
+}
+
+// ── Filter ──
+function setFilter(el, tag) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterTag = tag;
+  render();
+}
+
+// ── Search ──
+document.getElementById('search-input').addEventListener('input', e => {
+  searchQ = e.target.value.trim();
+  render();
+});
+
+// ── Render ──
+function render() {
+  const wrap = document.getElementById('list-wrap');
+  const list = ideas.filter(i => {
+    const mt = !filterTag || i.tag === filterTag;
+    const ms = !searchQ || i.content.includes(searchQ) || i.tag.includes(searchQ);
+    return mt && ms;
+  });
+
+  if (!list.length) {
+    wrap.innerHTML = `<div class="empty-state"><span class="empty-icon">💭</span>暂无记录<br><span style="font-size:12px">开始说话，捕捉此刻的灵感</span></div>`;
+    return;
+  }
+
+  wrap.innerHTML = list.map(idea => `
+    <div class="idea-card" id="card-${idea.id}">
+      <div class="card-main" onclick="toggleCard(${idea.id})">
+        <div class="card-top">
+          <span class="card-tag-badge badge-${idea.tag}">${idea.tag}</span>
+          <div class="card-meta">
+            <span class="card-source-icon">${idea.src === 'voice' ? '🎙' : '✍️'}</span>
+            <span class="card-time">${idea.time}</span>
+          </div>
+        </div>
+        <div class="card-body">${escHtml(idea.content)}</div>
+      </div>
+      <div class="card-actions">
+        <button class="action-btn" onclick="copyIdea(event,${idea.id})">📋 复制</button>
+        <button class="action-btn" onclick="shareIdea(event,${idea.id})">📤 分享</button>
+        <button class="action-btn" onclick="aiPolish(event,${idea.id},'polish')">✨ AI整理</button>
+        <button class="action-btn" onclick="aiPolish(event,${idea.id},'article')">📄 扩写成文章</button>
+        <button class="action-btn danger" onclick="deleteIdea(event,${idea.id})">🗑️</button>
+      </div>
+      <div class="ai-panel ${idea.ai ? 'visible' : ''}" id="ai-${idea.id}">
+        <div class="ai-panel-header">✦ AI 整理结果</div>
+        <div class="ai-text">${idea.ai ? escHtml(idea.ai) : ''}</div>
+        ${idea.ai ? `<div class="ai-copy-row"><button class="action-btn" onclick="copyAI(event,${idea.id})">📋 复制文章</button></div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Card toggle ──
+function toggleCard(id) {
+  const card = document.getElementById(`card-${id}`);
+  const wasExp = card.classList.contains('expanded');
+  document.querySelectorAll('.idea-card').forEach(c => c.classList.remove('expanded'));
+  if (!wasExp) card.classList.add('expanded');
+}
+
+// ── Delete ──
+function deleteIdea(e, id) {
+  e.stopPropagation();
+  ideas = ideas.filter(i => i.id !== id);
+  save(); render(); updateCount();
+  showToast('已删除');
+}
+
+// ── Copy ──
+function copyIdea(e, id) {
+  e.stopPropagation();
+  const idea = ideas.find(i => i.id === id);
+  copyText(idea.content);
+  showToast('✓ 已复制到剪贴板');
+}
+
+function copyAI(e, id) {
+  e.stopPropagation();
+  const idea = ideas.find(i => i.id === id);
+  copyText(idea.ai || '');
+  showToast('✓ 文章已复制，可粘贴到公众号');
+}
+
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const el = document.createElement('textarea');
+  el.value = text;
+  el.style.position = 'fixed';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+}
+
+// ── Share ──
+function shareIdea(e, id) {
+  e.stopPropagation();
+  const idea = ideas.find(i => i.id === id);
+  const text = `【${idea.tag}】${idea.content}\n\n— 来自灵感捕手 ${idea.time}`;
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => {});
+  } else {
+    copyText(text);
+    showToast('已复制，可粘贴分享');
+  }
+}
+
+// ── AI ──
+async function aiPolish(e, id, type) {
+  e.stopPropagation();
+  const idea = ideas.find(i => i.id === id);
+  if (!idea) return;
+
+  const panel = document.getElementById(`ai-${id}`);
+  const card = document.getElementById(`card-${id}`);
+  card.classList.add('expanded');
+  panel.classList.add('visible');
+  panel.innerHTML = `
+    <div class="ai-panel-header">✦ AI 正在处理</div>
+    <div class="ai-text loading"><div class="spinner"></div>思考中，稍等片刻…</div>
+  `;
+
+  const prompts = {
+    polish: `请将下面这段随手记录的想法整理成一段流畅、有深度的文字（150~250字）。保留原意，用第一人称，语气自然，去掉重复和口语化表达。
+
+原始想法："${idea.content}"
+
+只输出整理后的段落，不要加任何解释或标题。`,
+
+    article: `我有一个想法，请帮我扩写成一篇完整的公众号文章。
+
+核心想法："${idea.content}"
+
+要求：
+- 起一个有吸引力的标题
+- 开篇引入（吸引读者，50字内）
+- 正文展开（3个角度或层次，每个100字左右）
+- 结尾金句或行动号召
+- 总字数 600~900 字
+- 语气：亲切、有洞察、不说教
+
+直接输出文章内容，包含标题。`
+  };
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompts[type] }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || '生成失败，请重试';
+    idea.ai = text;
+    save();
+    panel.innerHTML = `
+      <div class="ai-panel-header">✦ AI ${type === 'polish' ? '整理' : '扩写'}结果</div>
+      <div class="ai-text">${escHtml(text)}</div>
+      <div class="ai-copy-row"><button class="action-btn" onclick="copyAI(event,${id})">📋 复制${type === 'article' ? '文章' : '内容'}</button></div>
+    `;
+  } catch(err) {
+    panel.innerHTML = `<div class="ai-panel-header">✦ 出错了</div><div class="ai-text loading">网络错误，请重试</div>`;
+  }
+}
+
+// ── Utils ──
+function save() { localStorage.setItem('lgsIdeas', JSON.stringify(ideas)); }
+
+function updateCount() {
+  document.getElementById('count-badge').textContent = `${ideas.length} 条`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
+</script>
+</body>
+</html>
